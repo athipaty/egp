@@ -175,8 +175,8 @@ function App() {
           <div className="divide-y divide-gray-50">
             {items.map((item, i) => (
               <div key={item._id ?? item.link ?? i} className="px-4 py-3 hover:bg-pink-50/40 transition-colors">
-                <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                <div className="flex items-start gap-2">
+                  <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                     {i + 1}
                   </span>
                   {item.link ? (
@@ -184,14 +184,14 @@ function App() {
                       href={item.link}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex-1 min-w-0 text-sm text-primary hover:text-secondary font-medium truncate"
+                      className="flex-1 min-w-0 text-sm text-primary hover:text-secondary font-medium"
                     >
                       {item.title}
                     </a>
                   ) : (
-                    <span className="flex-1 min-w-0 text-sm text-gray-800 font-medium truncate">{item.title}</span>
+                    <span className="flex-1 min-w-0 text-sm text-gray-800 font-medium">{item.title}</span>
                   )}
-                  <span className="text-[11px] text-gray-400 whitespace-nowrap flex-shrink-0">
+                  <span className="text-[11px] text-gray-400 whitespace-nowrap flex-shrink-0 mt-0.5">
                     {item.date
                       ? new Date(item.date).toLocaleDateString('th-TH', {
                           day: 'numeric',
@@ -201,6 +201,7 @@ function App() {
                       : ''}
                   </span>
                 </div>
+                {item.desc && <p className="text-[11px] text-gray-400 mt-1 pl-7">{item.desc}</p>}
                 {(item.winner || item.amount != null) && (
                   <div className="flex items-center gap-2 mt-1.5 pl-7">
                     <span className="flex-1 min-w-0 text-xs text-green-700 truncate">
