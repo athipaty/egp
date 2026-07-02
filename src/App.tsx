@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getEgpRss, type EgpItem, type MaintenanceInfo } from './api'
+import { getEgpRss, getEgpRssNational, type EgpItem, type MaintenanceInfo } from './api'
 
 // anounceType codes from CGD e-GP RSS manual
 const EGP_TYPES = [
@@ -11,7 +11,10 @@ const EGP_TYPES = [
   { key: 'B0', label: 'ร่างประกวดราคา' },
 ]
 
+type Scope = 'local' | 'national'
+
 function App() {
+  const [scope, setScope] = useState<Scope>('local')
   const [anounceType, setAnounceType] = useState('D0')
   const [items, setItems] = useState<EgpItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -28,7 +31,9 @@ function App() {
     setStaleAt(null)
     setFetchedAt(null)
 
-    getEgpRss(anounceType)
+    const request = scope === 'national' ? getEgpRssNational(anounceType) : getEgpRss(anounceType)
+
+    request
       .then((r) => {
         const d = r.data
         setItems(d.items || [])
@@ -42,7 +47,7 @@ function App() {
         else setError(d.error || 'ไม่สามารถเชื่อมต่อระบบ e-GP ได้')
       })
       .finally(() => setLoading(false))
-  }, [anounceType, tick])
+  }, [scope, anounceType, tick])
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 pb-12">
@@ -51,30 +56,72 @@ function App() {
         <p className="text-sm text-gray-500 mt-1">ประกาศจัดซื้อจัดจ้างจากระบบจัดซื้อจัดจ้างภาครัฐ</p>
       </header>
 
+      <div className="flex gap-1.5 mb-4">
+        <button
+          onClick={() => setScope('local')}
+          className={`flex-1 px-3 py-2 text-sm rounded-lg font-medium transition-colors ${
+            scope === 'local'
+              ? 'bg-primary text-white'
+              : 'bg-white border border-gray-200 text-gray-600 hover:border-primary hover:text-primary'
+          }`}
+        >
+          อบต.แม่ใส
+        </button>
+        <button
+          onClick={() => {
+            setScope('national')
+            setAnounceType('D0')
+          }}
+          className={`flex-1 px-3 py-2 text-sm rounded-lg font-medium transition-colors ${
+            scope === 'national'
+              ? 'bg-primary text-white'
+              : 'bg-white border border-gray-200 text-gray-600 hover:border-primary hover:text-primary'
+          }`}
+        >
+          ทั่วประเทศ (ประกาศเชิญชวน)
+        </button>
+      </div>
+
       <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
-        <div className="flex flex-wrap items-center gap-1.5 px-4 py-3 border-b border-gray-100 bg-gray-50">
-          {EGP_TYPES.map((t) => (
+        {scope === 'local' && (
+          <div className="flex flex-wrap items-center gap-1.5 px-4 py-3 border-b border-gray-100 bg-gray-50">
+            {EGP_TYPES.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setAnounceType(t.key)}
+                className={`px-3 py-1 text-xs rounded-full font-medium transition-colors ${
+                  anounceType === t.key
+                    ? 'bg-secondary text-white'
+                    : 'bg-white border border-gray-200 text-gray-600 hover:border-secondary hover:text-secondary'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
             <button
-              key={t.key}
-              onClick={() => setAnounceType(t.key)}
-              className={`px-3 py-1 text-xs rounded-full font-medium transition-colors ${
-                anounceType === t.key
-                  ? 'bg-secondary text-white'
-                  : 'bg-white border border-gray-200 text-gray-600 hover:border-secondary hover:text-secondary'
-              }`}
+              onClick={() => setTick((n) => n + 1)}
+              disabled={loading}
+              title="ดึงข้อมูลใหม่"
+              className="ml-auto flex items-center gap-1 text-xs text-gray-500 border border-gray-200 bg-white px-2.5 py-1 rounded-full hover:border-secondary hover:text-secondary transition-colors disabled:opacity-50"
             >
-              {t.label}
+              <span className={loading ? 'animate-spin inline-block' : ''}>🔄</span> รีเฟรช
             </button>
-          ))}
-          <button
-            onClick={() => setTick((n) => n + 1)}
-            disabled={loading}
-            title="ดึงข้อมูลใหม่"
-            className="ml-auto flex items-center gap-1 text-xs text-gray-500 border border-gray-200 bg-white px-2.5 py-1 rounded-full hover:border-secondary hover:text-secondary transition-colors disabled:opacity-50"
-          >
-            <span className={loading ? 'animate-spin inline-block' : ''}>🔄</span> รีเฟรช
-          </button>
-        </div>
+          </div>
+        )}
+
+        {scope === 'national' && (
+          <div className="flex items-center px-4 py-3 border-b border-gray-100 bg-gray-50">
+            <p className="text-xs text-gray-500">ประกาศเชิญชวน (ยื่นข้อเสนอได้) จากหน่วยงานราชการทั่วประเทศ</p>
+            <button
+              onClick={() => setTick((n) => n + 1)}
+              disabled={loading}
+              title="ดึงข้อมูลใหม่"
+              className="ml-auto flex items-center gap-1 text-xs text-gray-500 border border-gray-200 bg-white px-2.5 py-1 rounded-full hover:border-secondary hover:text-secondary transition-colors disabled:opacity-50 flex-shrink-0"
+            >
+              <span className={loading ? 'animate-spin inline-block' : ''}>🔄</span> รีเฟรช
+            </button>
+          </div>
+        )}
 
         {(fetchedAt || staleAt) && (
           <div className="px-4 py-1.5 bg-gray-50 border-b border-gray-100 text-[11px] text-gray-400 flex items-center gap-1.5">

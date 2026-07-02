@@ -32,3 +32,6 @@ export interface MaintenanceInfo {
 
 export const getEgpRss = (anounceType: string) =>
   api.get<EgpRssResponse>('/egp-rss', { params: anounceType ? { anounceType } : {} })
+
+export const getEgpRssNational = (anounceType: string) =>
+  api.get<EgpRssResponse>('/egp-rss-national', { params: anounceType ? { anounceType } : {} })
