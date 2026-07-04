@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { getEgpRss, getEgpRssNational, type EgpItem, type MaintenanceInfo } from './api'
+import { getEgpRss, type EgpItem, type MaintenanceInfo } from './api'
+import PhayaoHub from './PhayaoHub'
 
 // anounceType codes from CGD e-GP RSS manual
 const EGP_TYPES = [
@@ -11,7 +12,7 @@ const EGP_TYPES = [
   { key: 'B0', label: 'ร่างประกวดราคา' },
 ]
 
-type Scope = 'local' | 'national'
+type Scope = 'local' | 'phayao'
 
 function App() {
   const [scope, setScope] = useState<Scope>('local')
@@ -25,15 +26,15 @@ function App() {
   const [tick, setTick] = useState(0)
 
   useEffect(() => {
+    if (scope !== 'local') return
+
     setLoading(true)
     setError('')
     setMaintenance(null)
     setStaleAt(null)
     setFetchedAt(null)
 
-    const request = scope === 'national' ? getEgpRssNational(anounceType) : getEgpRss(anounceType)
-
-    request
+    getEgpRss(anounceType)
       .then((r) => {
         const d = r.data
         setItems(d.items || [])
@@ -68,22 +69,21 @@ function App() {
           อบต.แม่ใส
         </button>
         <button
-          onClick={() => {
-            setScope('national')
-            setAnounceType('D0')
-          }}
+          onClick={() => setScope('phayao')}
           className={`flex-1 px-3 py-2 text-sm rounded-lg font-medium transition-colors ${
-            scope === 'national'
+            scope === 'phayao'
               ? 'bg-primary text-white'
               : 'bg-white border border-gray-200 text-gray-600 hover:border-primary hover:text-primary'
           }`}
         >
-          ทั่วประเทศ (ประกาศเชิญชวน)
+          จังหวัดพะเยา
         </button>
       </div>
 
+      {scope === 'phayao' && <PhayaoHub />}
+
+      {scope === 'local' && (
       <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
-        {scope === 'local' && (
           <div className="flex flex-wrap items-center gap-1.5 px-4 py-3 border-b border-gray-100 bg-gray-50">
             {EGP_TYPES.map((t) => (
               <button
@@ -107,21 +107,6 @@ function App() {
               <span className={loading ? 'animate-spin inline-block' : ''}>🔄</span> รีเฟรช
             </button>
           </div>
-        )}
-
-        {scope === 'national' && (
-          <div className="flex items-center px-4 py-3 border-b border-gray-100 bg-gray-50">
-            <p className="text-xs text-gray-500">ประกาศเชิญชวน (ยื่นข้อเสนอได้) จากหน่วยงานราชการทั่วประเทศ</p>
-            <button
-              onClick={() => setTick((n) => n + 1)}
-              disabled={loading}
-              title="ดึงข้อมูลใหม่"
-              className="ml-auto flex items-center gap-1 text-xs text-gray-500 border border-gray-200 bg-white px-2.5 py-1 rounded-full hover:border-secondary hover:text-secondary transition-colors disabled:opacity-50 flex-shrink-0"
-            >
-              <span className={loading ? 'animate-spin inline-block' : ''}>🔄</span> รีเฟรช
-            </button>
-          </div>
-        )}
 
         {(fetchedAt || staleAt) && (
           <div className="px-4 py-1.5 bg-gray-50 border-b border-gray-100 text-[11px] text-gray-400 flex items-center gap-1.5">
@@ -230,6 +215,7 @@ function App() {
           </a>
         </div>
       </div>
+      )}
     </div>
   )
 }
