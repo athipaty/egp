@@ -43,7 +43,7 @@ function ProjectCard({ project }: { project: EgpProject }) {
   const methodHint = describeMethod(project.method)
 
   return (
-    <div className="px-4 py-3 hover:bg-pink-50/40 transition-colors">
+    <div className="rounded-xl border border-gray-100 p-3.5 hover:border-secondary/40 hover:shadow-sm transition-all">
       <div className="flex items-start gap-2">
         <a
           href={project.announcements[0]?.link}
@@ -182,7 +182,7 @@ function PhayaoHub() {
   }
 
   return (
-    <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+    <div className="rounded-2xl border border-gray-100 shadow-sm overflow-hidden bg-white">
       <div className="flex items-center px-4 py-2 border-b border-gray-100 bg-gray-50">
         <p className="text-xs text-gray-500">ประกาศจัดซื้อจัดจ้างทุกหน่วยงานใน จ.พะเยา รวมทุกขั้นตอนไว้ในการ์ดเดียว</p>
         <button
@@ -232,36 +232,38 @@ function PhayaoHub() {
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-1 text-[11px]">
-          <input
-            type="number"
-            placeholder="วงเงินต่ำสุด"
-            value={amountInputs.min}
-            onChange={(e) => setAmountInputs((v) => ({ ...v, min: e.target.value }))}
-            onKeyDown={(e) => e.key === 'Enter' && handleApplyAmount()}
-            className="w-24 px-2 py-1 border border-gray-200 rounded-lg"
-          />
-          <span className="text-gray-400">–</span>
-          <input
-            type="number"
-            placeholder="วงเงินสูงสุด"
-            value={amountInputs.max}
-            onChange={(e) => setAmountInputs((v) => ({ ...v, max: e.target.value }))}
-            onKeyDown={(e) => e.key === 'Enter' && handleApplyAmount()}
-            className="w-24 px-2 py-1 border border-gray-200 rounded-lg"
-          />
-          <button
-            onClick={handleApplyAmount}
-            className="px-2.5 py-1 rounded-full bg-white border border-gray-200 text-gray-600 hover:border-primary hover:text-primary"
-          >
-            กรอง
-          </button>
-        </div>
         <button
           onClick={handleSaveSearch}
           className="ml-auto px-2.5 py-1 text-[11px] rounded-full bg-white border border-gray-200 text-gray-600 hover:border-secondary hover:text-secondary whitespace-nowrap"
         >
           + บันทึกการค้นหานี้
+        </button>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-1.5 px-4 py-2.5 border-b border-gray-100 text-[11px]">
+        <span className="text-gray-400 flex-shrink-0">วงเงิน (บาท)</span>
+        <input
+          type="number"
+          placeholder="ต่ำสุด"
+          value={amountInputs.min}
+          onChange={(e) => setAmountInputs((v) => ({ ...v, min: e.target.value }))}
+          onKeyDown={(e) => e.key === 'Enter' && handleApplyAmount()}
+          className="w-24 sm:w-28 px-2 py-1 border border-gray-200 rounded-lg"
+        />
+        <span className="text-gray-400">–</span>
+        <input
+          type="number"
+          placeholder="สูงสุด"
+          value={amountInputs.max}
+          onChange={(e) => setAmountInputs((v) => ({ ...v, max: e.target.value }))}
+          onKeyDown={(e) => e.key === 'Enter' && handleApplyAmount()}
+          className="w-24 sm:w-28 px-2 py-1 border border-gray-200 rounded-lg"
+        />
+        <button
+          onClick={handleApplyAmount}
+          className="px-2.5 py-1 rounded-full bg-white border border-gray-200 text-gray-600 hover:border-primary hover:text-primary"
+        >
+          กรอง
         </button>
       </div>
 
@@ -325,7 +327,7 @@ function PhayaoHub() {
       ) : projects.length === 0 && !maintenance ? (
         <div className="p-10 text-center text-gray-400 text-sm">ไม่พบข้อมูลที่ตรงกับเงื่อนไข</div>
       ) : projects.length === 0 ? null : (
-        <div className="divide-y divide-gray-50">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 p-3">
           {projects.map((p) => (
             <ProjectCard key={p.projectId} project={p} />
           ))}
